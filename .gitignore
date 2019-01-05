@@ -1,0 +1,9 @@
+nodesource_setup.sh
+.*
+.*/
+node_modules/
+test/
+workspace/
+srv/
+temp/
+public/

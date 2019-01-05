@@ -6,7 +6,7 @@ var mongoose    = require('mongoose');
 
 // [CONFIGURE APP TO USE bodyParser]
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '15mb'}));
 
 // [CONFIGURE SERVER PORT]
 var port = process.env.PORT || 80;
@@ -14,9 +14,10 @@ var port = process.env.PORT || 80;
 
 // DEFINE MODEL
 var Contact = require('./models/contact');
+var Photo = require('./models/photo');
 
 // [CONFIGURE ROUTER]
-var router = require('./routes')(app, Contact)
+var router = require('./routes')(app, Contact, Photo)
 
 // [RUN SERVER]
 var server = app.listen(port, function(){
@@ -31,3 +32,4 @@ db.once('open', function(){
 });
 
 mongoose.connect('mongodb://localhost:27017');
+
