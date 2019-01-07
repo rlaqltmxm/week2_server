@@ -2,16 +2,14 @@ const express = require('express');
 
 module.exports = function(app, Contact, Photo)
 {
-    /*
-    Contact {
-        (_id: String,)
-        fb_id: String,
-        contacts: [{
-            name: String,
-            phone: String
-        }]
-    }
-    */
+    // Contact {
+    //     (_id: String,)
+    //     fb_id: String,
+    //     contacts: [{
+    //         name: String,
+    //         phone: String
+    //     }]
+    // }
 
     // GET ALL CONTACTS
     app.get('/api/contacts/:fb_id', function(req,res){
@@ -98,13 +96,27 @@ module.exports = function(app, Contact, Photo)
         })
     });
 
+
+    // Photo {
+    //     (_id: String,)        
+    //     fb_id: String,
+    //     uploader: String,
+    //     like: Number,
+    //     date: Number,
+    //     lat: Number,
+    //     lng: Number
+    // }
+
     // NEW PHOTO UPLOAD
     app.post('/api/photo/:fb_id', function(req, res){
         var photo = new Photo();
         photo.fb_id = req.params.fb_id;
+        photo.name = req.body.name;
+        photo.date = req.body.date;
         photo.lat = req.body.lat;
         photo.lng = req.body.lng;
-
+        photo.like = 0;
+        
         console.log("<- POST")
 
         photo.save(function(err, result){
@@ -126,10 +138,34 @@ module.exports = function(app, Contact, Photo)
     app.use('/static', express.static('public'));
 
     // PHOTO DOWNLOAD
-    //app.get();
+    app.get('/api/photo', function(req, res){
+        Photo.find(function(err, result){
+            if(err) return res.status(500).send({ error: 'database failure' });
+            res.json(result);
+        });
+    });
 
     // PHOTO DELETE BY FACEBOOK ID
+    app.delete('/api/photo/:fb_id/:_id', function(req, res){
+        try{
+            Photo.deleteOne({ fb_id: req.params.fb_id, _id: req.params._id }, function(err, output){
+                if(err) res.status(500).json({ error: 'database failure' });
+                if(!output) return res.status(404).json({ error: 'contact not found' });
+                res.status(204).end();
+            })
+        } catch(e){
+            print(e);
+        }
+    });
 
-    // ADD SCHEMA: NAME, LIKE, DISLIKE
+    // ADD SCHEMA: NAME, LIKE, DATETIME
+    // UPDATE LIKE COUNT
+    app.put('/api/photo/:fb_id/:_id', function(req, res){
+        Photo.update({ _id: req.params._id }, { $inc: { like: 1 }}, function(err, output){
+            if(err) res.status(500).json({ error: 'database failure' });
+            if(!output) return res.status(404).json({ error: 'contact not found' });
+            res.status(204).end();
+        })
+    });
 
 }
